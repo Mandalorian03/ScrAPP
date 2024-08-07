@@ -1,5 +1,4 @@
 streamlit
 requests
 pandas
-json
-urllib3
+

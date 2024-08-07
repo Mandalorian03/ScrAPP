@@ -9,13 +9,11 @@ import streamlit as st
 from typing import Dict, List, Any
 from datetime import datetime
 
-# Helper functions
-
 def parse_urlencoded_to_dict(urlencoded_str: str) -> Dict[str, str]:
     return dict(parse_qsl(urlencoded_str))
 
-def get_params_config(config_type: str, session_id: str, ad_status: str, country: str, 
-                      start_date: datetime, end_date: datetime, page: str = None, 
+def get_params_config(config_type: str, session_id: str, ad_status: str, country: str,
+                      start_date: datetime, end_date: datetime, page: str = None,
                       query: str = None, v_value: str = '2c4a00') -> Dict[str, str]:
     common_params = {
         'session_id': session_id,
@@ -40,7 +38,7 @@ def get_params_config(config_type: str, session_id: str, ad_status: str, country
     else:
         raise ValueError("Invalid config type. Must be 'keyword' or 'page'.")
 
-def get_ads_data_for_domain(params: Dict[str, str], headers: Dict[str, str], 
+def get_ads_data_for_domain(params: Dict[str, str], headers: Dict[str, str],
                             data: Dict[str, str], item: str) -> List[Dict[str, Any]]:
     results = []
     forward_cursor = ''
@@ -54,16 +52,27 @@ def get_ads_data_for_domain(params: Dict[str, str], headers: Dict[str, str],
                                  headers=headers, params=params, data=data)
         
         if response.status_code != 200:
+            st.error(f"Request failed with status code: {response.status_code}")
+            st.write(response.text)  # Log the response text for debugging
             break
 
         try:
             data_json = json.loads(response.text.lstrip('for (;;);'))
         except json.JSONDecodeError as e:
+            st.error(f"JSON decode error: {e}")
+            st.write(response.text)  # Log the response text for debugging
             break
         
+        if data_json is None:
+            st.error("data_json is None")
+            break
+
+        st.write(f"Response data: {data_json}")  # Debugging line to check the response
+
         if data_json.get('payload', {}).get('results'):
             results.extend(data_json['payload']['results'])
         else:
+            st.error("No results found in the response.")
             break
 
         forward_cursor = data_json['payload'].get('forwardCursor')
