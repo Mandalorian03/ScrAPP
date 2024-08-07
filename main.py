@@ -80,7 +80,7 @@ def get_ads_data_for_domain(params: Dict[str, str], headers: Dict[str, str],
         if not forward_cursor:
             break
 
-        time.sleep(1)
+        time.sleep(3)
 
     return results
 
